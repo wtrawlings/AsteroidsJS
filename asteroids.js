@@ -6,6 +6,8 @@ let ship;
 let keys = []; //to hold multiple keystrokes you need to value them as an array;
 let bullets = [];
 let asteroids = [];
+let score = 0;
+let lives = 3;
 
 document.addEventListener('DOMContentLoaded', SetupCanvas);
 
@@ -64,17 +66,17 @@ class Ship {
                 this.velY += Math.sin(radians) * this.speed;
             }
             //these are reset position if you go off the screen
-            if (this.x < this.radius) {
-                this.x = canvas.width;
+            if (this.x < this.radius) { //you went off the left side
+                this.x = canvas.width; //the max right side number
             }
-            if (this.x > this.width) {
+            if (this.x > canvas.width) {
                 this.x = this.radius;
             }
             if (this.y < this.radius) {
                 this.y = canvas.height;
             }
-            if (this.y > this.height) {
-                this.y = canvas.radius
+            if (this.y > canvas.height) {
+                this.y = this.radius
             }
             this.velX *= 0.99; //this will slow down the ship
             this.velY *= 0.99; //this will slow down the ship
@@ -129,16 +131,18 @@ class Bullet {
     }
 }
 class Asteroid {
-    constructor(x, y) {
+    constructor(x, y, radius, level, collisionRadius) {
         this.visible = true;
-        this.x = Math.floor(Math.random() * canvasWidth);
-        this.y = Math.floor(Math.random() * canvasHeight);
+        this.x = x || Math.floor(Math.random() * canvasWidth);
+        this.y = y || Math.floor(Math.random() * canvasHeight);
         //we have to multiply the random number by the canvas sizes to make sure 
         //they show up in the canvas an not off screen
-        this.speed = 1;
-        this.radius = 50;
+        this.speed = 5;
+        this.radius = radius || 50;
         this.angle = Math.floor(Math.random() * 359);
         this.strokeColor = "white";
+        this.collisionRadius = collisionRadius || 46;
+        this.level = level || 1;
     }
     Update() {
         var radians = this.angle / Math.PI * 180;
@@ -147,14 +151,14 @@ class Asteroid {
         if (this.x < this.radius) {
             this.x = canvas.width;
         }
-        if (this.x > this.width) {
+        if (this.x > canvas.width) {
             this.x = this.radius;
         }
         if (this.y < this.radius) {
             this.y = canvas.height;
         }
-        if (this.y > this.height) {
-            this.y = canvas.radius
+        if (this.y > canvas.height) {
+            this.y = this.radius
         }
     }
     Draw() {
@@ -169,6 +173,39 @@ class Asteroid {
     }
 }
 
+function CircleCollision(p1x, p1y, r1, p2x, p2y, r2) {
+    let radiusSum;
+    let xDiff;
+    let yDiff;
+    radiusSum = r1 + r2;
+    xDiff = p1x - p2x;
+    yDiff = p1y - p2y;
+    if (radiusSum > Math.sqrt((xDiff * xDiff) + (yDiff * yDiff))) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function DrawLifeShips() {
+    let startX = 1350;
+    let startY = 10;
+    let points = [
+        [9, 9],
+        [-9, 9]
+    ];
+    ctx.strokeStyle = "white";
+    for (let i = 0; i < lives; i++) {
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        for (let j = 0; j < points.length; j++) {
+            ctx.lineTo(startX + points[j][0], startY + points[j][1]);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        startX -= 30;
+    }
+}
 
 function Render() {
     //is the ship moving forward? Is player pressing the 'W' key?
@@ -181,6 +218,54 @@ function Render() {
     }
     //update the screen by clearing current rectangle and draw new stuff
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.fillStyle = "white";
+    ctx.font = '21px Arial';
+    ctx.fillText('SCORE: ' + score.toString(), 20, 35);
+    if (lives <= 0) {
+        ship.visibility = false;
+        ctx.fillStyle = 'white';
+        ctx.font = '50px Arial';
+        ctx.fillText('GAME OVER', canvasWidth / 2 - 150, canvasHeight / 2);
+    }
+    DrawLifeShips();
+
+    if (asteroids.length != 0) {
+        for (let k = 0; k < asteroids.length; k++) {
+            if (CircleCollision(ship.x, ship.y, 11, asteroids[k].x, asteroids[k].y, asteroids[k].collisionRadius)) {
+                ship.x = canvasWidth / 2;
+                ship.y = canvasHeight / 2;
+                ship.velX = 0;
+                ship.velY = 0;
+                lives -= 1;
+            }
+        }
+    }
+
+    if (asteroids.length != 0 && bullets.length != 0) {
+        loop1: for (let l = 0; l < asteroids.length; l++) {
+            for (let m = 0; m < bullets.length; m++) {
+                if (CircleCollision(bullets[m].x, bullets[m].y, 3, asteroids[l].x, asteroids[l].y, asteroids[l].collisionRadius)) {
+                    if (asteroids[l].level === 1) {
+                        asteroids.push(new Asteroid(asteroids[l].x - 5, asteroids[l].y - 5, 25, 2, 22));
+                        asteroids.push(new Asteroid(asteroids[l].x + 5, asteroids[l].y + 5, 25, 2, 22));
+                    } else if (asteroids[l].level === 2) {
+                        asteroids.push(new Asteroid(asteroids[l].x - 5, asteroids[l].y - 5, 15, 3, 12));
+                        asteroids.push(new Asteroid(asteroids[l].x + 5, asteroids[l].y + 5, 15, 3, 12));
+                    }
+                    asteroids.splice(l, 1);
+                    bullets.splice(m, 1);
+                    score += 20;
+                    break loop1;
+                }
+            }
+        }
+    }
+
+    if (ship.visible) {
+        ship.Update();
+        ship.Draw();
+    }
+
     ship.Update(); //this updates the data on the ship
     ship.Draw(); //this draws the ship in a brand new place
     if (bullets.length != 0) { //if there is anything in the bullets array...
@@ -189,11 +274,14 @@ function Render() {
             bullets[i].Draw(); //...and then draw the bullets
         }
     }
-    if (asteroids.length != 0) { //if there is anything in the bullets array...
-        for (let j = 0; j < bullets.length; j++) {
+    if (asteroids.length != 0) { //if there is anything in the asteroid array...
+        for (let j = 0; j < asteroids.length; j++) {
             asteroids[j].Update(); //...we need to update...
-            asteroids[j].Draw(); //...and then draw the bullets
+            asteroids[j].Draw(j); //...and then draw the bullets
         }
     }
     requestAnimationFrame(Render);
 }
+//PLEASE NOTE THERE IS AN ERROR IN THE GAME WHEN YOU FLY OFF THE CANVAS ON 
+//THE RIGHT AND BOTTOM SIDES-THEY DON't SEND YOU TO THE OTHER SIDE AS THE
+//OTHER SIDES DO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
