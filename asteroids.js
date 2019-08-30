@@ -42,31 +42,46 @@ class Ship {
         this.angle += this.RotateSpeed * dir;
     }
     update() {
-        let radians = this.angle / Math.PI * 180;
-        //old x + Cos(radians) * Distance
-        //old y + SIN(radians) * Distance
-        if (movingForward) {
-            this.velX += Math.cos(radians) * this.speed;
-            this.velY += Math.sin(radians) * this.speed;
-        }
-        //these are reset position if you go off the screen
-        if (this.x < this.radius) {
-            this.x = canvas.width;
-        }
-        if (this.x > this.width) {
-            this.x = this.radius;
-        }
-        if (this.y < this.radius) {
-            this.y = canvas.height;
-        }
-        if (this.y > this.height) {
-            this.y = canvas.radius
-        }
-        this.velX *= 0.99; //this will slow down the ship
-        this.velY *= 0.99; //this will slow down the ship
+            let radians = this.angle / Math.PI * 180;
+            //old x + Cos(radians) * Distance
+            //old y + SIN(radians) * Distance
+            if (movingForward) {
+                this.velX += Math.cos(radians) * this.speed;
+                this.velY += Math.sin(radians) * this.speed;
+            }
+            //these are reset position if you go off the screen
+            if (this.x < this.radius) {
+                this.x = canvas.width;
+            }
+            if (this.x > this.width) {
+                this.x = this.radius;
+            }
+            if (this.y < this.radius) {
+                this.y = canvas.height;
+            }
+            if (this.y > this.height) {
+                this.y = canvas.radius
+            }
+            this.velX *= 0.99; //this will slow down the ship
+            this.velY *= 0.99; //this will slow down the ship
 
-        this.x -= this.velX;
-        this.y -= this.velY;
+            this.x -= this.velX;
+            this.y -= this.velY;
+
+        }
+        //this is drawing the triangle that represents your ship
+        //x and y are the center of a circle with radius of 15
+        //we devide the circle up into a triangle (3 equidistant points)
+    Draw() {
+        ctx.strokeStyle = this.strokeColor;
+        ctx.beginPath(); //start drawing the ship from here
+        let vertAngle = ((Math.PI * 2) / 3);
+        let radians = this.angle / Math.PI * 180;
+        for (let i = 0; i < 3; i++) {
+            ctx.lineTo(this.x - this.radius * Math.cos(vertAngle * i + radians), this.y - this.radius * Math.sin(vertAngle * i + radians));
+        }
+        ctx.closePath();
+        ctx.stroke(); //makes the lines white
 
     }
 }
@@ -75,5 +90,17 @@ let ship = new Ship();
 
 
 function Render() {
-
+    //is the ship moving forward? Is player pressing the 'W' key?
+    ship.movingForward = (keys[87]);
+    if (keys[68]) { //'D' key value
+        ship.Rotate(1);
+    }
+    if (keys[65]) { //'A' key value
+        ship.Rotate(-1);
+    }
+    //update the screen by clearing current and draw new stuff
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ship.Update();
+    ship.Draw();
+    requestAnimationFrame(Render);
 }
