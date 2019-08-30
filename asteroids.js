@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', SetupCanvas);
 
 function SetupCanvas() {
     canvas = document.getElementById('my-canvas');
-    ctx canvas.getContext('2d');
+    ctx = canvas.getContext('2d');
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
     ctx.fillStyle = "black";
@@ -41,7 +41,7 @@ class Ship {
     Rotate(dir) {
         this.angle += this.RotateSpeed * dir;
     }
-    update() {
+    Update() {
             let radians = this.angle / Math.PI * 180;
             //old x + Cos(radians) * Distance
             //old y + SIN(radians) * Distance
@@ -80,7 +80,7 @@ class Ship {
         for (let i = 0; i < 3; i++) {
             ctx.lineTo(this.x - this.radius * Math.cos(vertAngle * i + radians), this.y - this.radius * Math.sin(vertAngle * i + radians));
         }
-        ctx.closePath();
+        ctx.closePath(); //this is the last let of the triangle
         ctx.stroke(); //makes the lines white
 
     }
