@@ -223,6 +223,7 @@ function Render() {
     ctx.fillText('SCORE: ' + score.toString(), 20, 35);
     if (lives <= 0) {
         ship.visibility = false;
+        console.log('why can I still see the ship?');
         ctx.fillStyle = 'white';
         ctx.font = '50px Arial';
         ctx.fillText('GAME OVER', canvasWidth / 2 - 150, canvasHeight / 2);
