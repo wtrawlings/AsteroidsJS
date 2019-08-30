@@ -19,33 +19,32 @@ function SetupCanvas() {
     document.body.addEventListener("keyup", function(e) {
         keys[e.keyCode] = false;
     });
-    //this is feeding key presses into key array and releases
-    //key strokes as well
+    //this is feeding key presses and releases into the keys array
     Render(); //calling the Render Function notice CapitalIZED
 }
 class Ship {
     constructor() {
         this.visible = true;
-        this.x = canvasWidth / 2;
-        this.y = canvasHeight / 2;
-        this.movingForward = false;
+        this.x = canvasWidth / 2; //center
+        this.y = canvasHeight / 2; //center
+        this.movingForward = false; //start setting is NOT moving
         this.speed = 0.1; //this is ramp up speed per keydown
         this.velX = 0; //origin speed
         this.velY = 0;
-        this.rotationSpeed = 0.001;
+        this.rotateSpeed = 0.001;
         this.radius = 15;
-        this.angle = 0;
+        this.angle = 0; //looking WEST or Zero on a protractor
         this.strokeColor = 'white';
 
     }
     Rotate(dir) {
-        this.angle += this.RotateSpeed * dir;
+        this.angle += this.rotateSpeed * dir;
     }
     Update() {
             let radians = this.angle / Math.PI * 180;
-            //old x + Cos(radians) * Distance
-            //old y + SIN(radians) * Distance
-            if (movingForward) {
+            //old x + cos(radians) * distance
+            //old y + sin(radians) * distance
+            if (this.movingForward) {
                 this.velX += Math.cos(radians) * this.speed;
                 this.velY += Math.sin(radians) * this.speed;
             }
