@@ -38,9 +38,9 @@ function SetupCanvas() {
 }
 class Ship {
     constructor() {
-        this.visible = true;
-        this.x = canvasWidth / 2; //center
-        this.y = canvasHeight / 2; //center
+        this.visible = true; //you can see me
+        this.x = canvasWidth / 2; //center horizontal is where I always spawn
+        this.y = canvasHeight / 2; //center verticle
         this.movingForward = false; //start setting is NOT moving
         this.speed = 0.1; //this is ramp up speed per keydown
         this.velX = 0; //origin speed
@@ -88,6 +88,7 @@ class Ship {
         //this is drawing the triangle that represents your ship
         //x and y are the center of a circle with radius of 15
         //we devide the circle up into a triangle (3 equidistant points)
+        //we draw two lines and then close the shape with ctx.closePath()
     Draw() {
         ctx.strokeStyle = this.strokeColor;
         ctx.beginPath(); //start drawing the ship from here
@@ -113,7 +114,7 @@ class Bullet {
         this.angle = angle;
         this.height = 4; //bullets will be small squares
         this.width = 4;
-        this.speed = 5; //bullets move 5x faster than ship max speed
+        this.speed = 7; //bullets move 5x faster than ship max speed
         this.velX = 0; //but they start at 0 velocity
         this.velY = 0;
     }
@@ -137,7 +138,7 @@ class Asteroid {
         this.y = y || Math.floor(Math.random() * canvasHeight);
         //we have to multiply the random number by the canvas sizes to make sure 
         //they show up in the canvas an not off screen
-        this.speed = 5;
+        this.speed = 5; //same speed as your ship.
         this.radius = radius || 50;
         this.angle = Math.floor(Math.random() * 359);
         this.strokeColor = "white";
@@ -277,11 +278,8 @@ function Render() {
     if (asteroids.length != 0) { //if there is anything in the asteroid array...
         for (let j = 0; j < asteroids.length; j++) {
             asteroids[j].Update(); //...we need to update...
-            asteroids[j].Draw(j); //...and then draw the bullets
+            asteroids[j].Draw(j); //...and then draw the asteroids
         }
     }
     requestAnimationFrame(Render);
 }
-//PLEASE NOTE THERE IS AN ERROR IN THE GAME WHEN YOU FLY OFF THE CANVAS ON 
-//THE RIGHT AND BOTTOM SIDES-THEY DON't SEND YOU TO THE OTHER SIDE AS THE
-//OTHER SIDES DO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
