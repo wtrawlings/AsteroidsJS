@@ -269,6 +269,7 @@ function Render() {
 
     ship.Update(); //this updates the data on the ship
     ship.Draw(); //this draws the ship in a brand new place
+    //I may need to remove the two preceeding lines in order to let the above IF statement to take effect. 
     if (bullets.length != 0) { //if there is anything in the bullets array...
         for (let i = 0; i < bullets.length; i++) {
             bullets[i].Update(); //...we need to update...
